@@ -429,7 +429,7 @@ async function demoGenerate(eventId: string) {
   }
 }
 
-async function demoAutoAnswer(eventId: string) {
+async function demoAutoAnswer(eventId: string, exclude: string[] = []) {
   const r = await currentRound(eventId);
   const parts = await q('select id, team_id, is_leader from participants where event_id=$1 and is_virtual', [eventId]);
   const g = r.game_type as GameType;
@@ -437,6 +437,7 @@ async function demoAutoAnswer(eventId: string) {
   const question = r.question_id ? await q1('select answer from questions where id=$1', [r.question_id]) : null;
   let n = 0;
   for (const p of parts) {
+    if (exclude.includes(p.id)) continue;
     let kind = 'answer';
     let value: any;
     let scope = 'individual';
@@ -942,7 +943,7 @@ export async function adminAction(slug: string, action: string, p: any) {
       break;
     case 'demo.autoAnswer':
       if (!ev.is_demo) throw new AppError('데모 모드에서만 사용할 수 있습니다.');
-      data = await demoAutoAnswer(E);
+      data = await demoAutoAnswer(E, Array.isArray(p.exclude) ? p.exclude : []);
       break;
     case 'demo.randomScores': {
       if (!ev.is_demo) throw new AppError('데모 모드에서만 사용할 수 있습니다.');
