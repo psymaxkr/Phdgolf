@@ -12,7 +12,7 @@ declare global {
 }
 
 function makePool() {
-  const raw = process.env.DATABASE_URL;
+  const raw = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
   if (!raw) throw new Error('DATABASE_URL 환경변수가 설정되지 않았습니다.');
   const url = new URL(raw);
   const local = ['localhost', '127.0.0.1'].includes(url.hostname) || process.env.DB_SSL === 'false';

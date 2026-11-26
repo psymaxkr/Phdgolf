@@ -6,7 +6,7 @@ const COOKIE = 'phd_admin';
 
 function secret() {
   // SESSION_SECRET이 없으면 DB 주소+관리자 비밀번호로 서버 전용 비밀값을 만듭니다 (브라우저에 노출되지 않음)
-  const s = process.env.SESSION_SECRET || crypto.createHash('sha256').update(`${process.env.DATABASE_URL ?? ''}|${process.env.ADMIN_PASSWORD ?? ''}`).digest('hex');
+  const s = process.env.SESSION_SECRET || crypto.createHash('sha256').update(`${process.env.SUPABASE_DB_URL ?? process.env.DATABASE_URL ?? ''}|${process.env.ADMIN_PASSWORD ?? ''}`).digest('hex');
   if (!process.env.ADMIN_PASSWORD) throw new Error('ADMIN_PASSWORD 환경변수가 필요합니다.');
   return s;
 }
