@@ -77,19 +77,68 @@ function Live({ slug }: { slug: string }) {
 function Lobby({ st, slug }: { st: any; slug: string }) {
   const [url, setUrl] = useState('');
   useEffect(() => setUrl(`${window.location.origin}${slug === 'demo' ? '/demo' : '/'}`), [slug]);
-  return (
-    <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] items-center gap-[4vw]">
-      <div className="rounded-3xl border-4 border-gold bg-white p-6 shadow-xl">{url && <QRCodeSVG value={url} size={Math.round(window.innerHeight * 0.42)} />}</div>
-      <div>
-        <div className="text-[2vw] font-bold text-ivory/70">{st.event.name}</div>
-        <div className="gold-text text-[5.5vw] font-black leading-tight">휴대폰으로 입장하세요!</div>
-        <div className="mt-4 break-all text-[2.4vw] font-black text-gold">{url.replace(/^https?:\/\//, '')}</div>
-        <div className="mt-8 flex items-end gap-4">
-          <span className="text-[2vw]">현재 접속</span>
-          <span className="text-[6vw] font-black leading-none text-turf">{st.counts.online}</span>
-          <span className="text-[3vw] font-bold text-ivory/60">/ {st.counts.total}명</span>
+  const rk = st.rankings;
+  const offline: string[] = st.offline ?? [];
+  const Offline = () =>
+    offline.length > 0 ? (
+      <div className="mt-4 rounded-2xl bg-amber-50 px-5 py-3 text-[1.5vw] text-amber-800">
+        아직 접속 전: <b>{offline.slice(0, 12).join(', ')}</b>{offline.length > 12 && ` 외 ${offline.length - 12}명`}
+      </div>
+    ) : null;
+  if (!rk)
+    return (
+      <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] items-center gap-[4vw]">
+        <div className="rounded-3xl border-4 border-gold bg-white p-6 shadow-xl">{url && <QRCodeSVG value={url} size={Math.round(window.innerHeight * 0.42)} />}</div>
+        <div>
+          <div className="text-[2vw] font-bold text-ivory/70">{st.event.name}</div>
+          <div className="gold-text text-[5.5vw] font-black leading-tight">휴대폰으로 입장하세요!</div>
+          <div className="mt-4 break-all text-[2.4vw] font-black text-gold">{url.replace(/^https?:\/\//, '')}</div>
+          <div className="mt-8 flex items-end gap-4">
+            <span className="text-[2vw]">현재 접속</span>
+            <span className="text-[6vw] font-black leading-none text-turf">{st.counts.online}</span>
+            <span className="text-[3vw] font-bold text-ivory/60">/ {st.counts.total}명</span>
+          </div>
+          <Offline />
+          <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="mt-6 text-[1.6vw] text-ivory/60">사회자가 곧 게임을 시작합니다 ⛳</motion.div>
         </div>
-        <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="mt-6 text-[1.6vw] text-ivory/60">사회자가 곧 게임을 시작합니다 ⛳</motion.div>
+      </div>
+    );
+  // 게임이 끝난 뒤 대기 화면: 마지막으로 공개한 순위표
+  return (
+    <div className="grid h-full w-full max-w-[96vw] grid-cols-[1fr_1.35fr] gap-[3vw]">
+      <div className="flex flex-col">
+        <div className="mb-3 flex items-center gap-3 text-[2.4vw] font-black text-gold"><Trophy size={40} /> 조별 순위</div>
+        <div className="grid gap-3">
+          {rk.team.map((t: any, i: number) => (
+            <motion.div key={t.id} initial={{ x: -40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.15 }} className="flex items-center gap-4 rounded-3xl border-2 bg-white px-6 py-[1.6vh] shadow" style={{ borderColor: t.rank === 1 ? '#C9A227' : '#D3DEEA' }}>
+              <Medal rank={t.rank} />
+              <span className="flex-1 text-[2.8vw] font-black" style={{ color: t.color }}>{t.name}</span>
+              <span className="text-[3vw] font-black tabular-nums">{fmt(t.total)}</span>
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-auto flex items-center gap-4 pt-4">
+          <div className="rounded-2xl border-2 border-gold bg-white p-2">{url && <QRCodeSVG value={url} size={Math.round(window.innerHeight * 0.16)} />}</div>
+          <div className="text-[1.5vw]">
+            <div>현재 접속 <b className="text-[2.4vw] text-turf">{st.counts.online}</b> / {st.counts.total}명</div>
+            <div className="text-ivory/60">다음 게임을 준비 중입니다 ⛳</div>
+          </div>
+        </div>
+        <Offline />
+      </div>
+      <div className="flex flex-col">
+        <div className="mb-3 text-[2.4vw] font-black text-turf">개인 순위</div>
+        <div className="grid grid-flow-col grid-cols-2 grid-rows-9 gap-x-4 gap-y-[0.6vh]">
+          {rk.individual.slice(0, 18).map((x: any, i: number) => (
+            <motion.div key={x.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.04 }} className={`flex items-center gap-2 rounded-xl px-3 py-[0.5vh] text-[1.5vw] ${x.rank <= 3 ? 'bg-white font-black shadow' : 'bg-white/60'}`}>
+              <Medal rank={x.rank} />
+              <span className="flex-1 truncate">{x.name} <span className="text-[1.1vw]" style={{ color: x.color }}>{x.teamName}</span></span>
+              {x.delta ? <span className={`text-[1.1vw] font-bold ${x.delta > 0 ? 'text-turf' : 'text-red-600'}`}>{x.delta > 0 ? '▲' : '▼'}{Math.abs(x.delta)}</span> : null}
+              <span className="font-black tabular-nums">{fmt(x.total)}</span>
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-2 text-right text-[1.1vw] text-ivory/50">{new Date(rk.at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 발표 기준</div>
       </div>
     </div>
   );

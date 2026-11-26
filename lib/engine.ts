@@ -436,6 +436,7 @@ export async function screenState(slug: string) {
     counts: { online: core.participants.filter((p) => isOnline(p, now)).length, total: core.participants.length },
     session: { game: s.current_game, phase: s.phase, overlay: s.overlay, overlayData: s.overlay_data },
     rankings: s.published_rankings ?? null,
+    offline: core.participants.filter((p) => !isOnline(p, now)).map((p) => p.name),
   };
   if (s.current_game) {
     const cfg = gameConfig(core.games, s.current_game);

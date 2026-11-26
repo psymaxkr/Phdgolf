@@ -266,6 +266,30 @@ function Lobby({ st, onRank }: { st: any; onRank: () => void }) {
           ))}
         </div>
       </div>
+      {st.rankings && (
+        <button className="card mb-4 block w-full text-left" onClick={onRank}>
+          <div className="mb-3 flex items-center justify-between">
+            <div className="text-xl font-bold">🏆 현재 순위</div>
+            <span className="text-sm text-ivory/50">{new Date(st.rankings.at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 발표</span>
+          </div>
+          {st.rankings.team.map((t: any) => (
+            <div key={t.id} className={`mb-2 flex items-center gap-3 rounded-xl px-3 py-2 ${t.id === st.me.teamId ? 'border-2 border-gold' : 'bg-forest-deep'}`}>
+              <Medal rank={t.rank} />
+              <span className="flex-1 text-xl font-bold" style={{ color: t.color }}>{t.name}</span>
+              <span className="text-xl font-black tabular-nums">{fmt(t.total)}</span>
+            </div>
+          ))}
+          {(() => {
+            const mine = st.rankings.individual.find((x: any) => x.id === st.me.id);
+            return mine ? (
+              <div className="mt-3 rounded-xl bg-turf-pale px-3 py-2 text-center text-lg">
+                나의 개인 순위 <b className="text-2xl text-turf">{mine.rank}위</b> / {st.rankings.individual.length}명 · {fmt(mine.total)}점
+              </div>
+            ) : null;
+          })()}
+          <div className="mt-2 text-center text-sm text-ivory/50">눌러서 전체 순위 보기</div>
+        </button>
+      )}
       {st.myWins?.length > 0 && (
         <div className="card mb-4 border-gold">
           <div className="mb-2 text-xl font-bold text-gold">🎁 나의 당첨 내역</div>
