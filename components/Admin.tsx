@@ -144,8 +144,30 @@ function Control({ st, act, busy, serverNow, slug }: P) {
   const canNext = meta && meta.kind !== 'lucky' && (!r || r.status === 'revealed');
   const roundsDone = ginfo && ginfo.revealed >= ginfo.totalRounds;
 
+  // 휴대폰 진행용: 지금 눌러야 할 버튼 하나
+  let primary: { label: string; run: () => void } | null = null;
+  if (s.overlay === 'ceremony') primary = { label: '다음 발표 ▶', run: () => act('ceremony.step', { dir: 1 }) };
+  else if (s.overlay) primary = { label: '순위 화면 닫기', run: () => act('overlay.close') };
+  else if (game === 'P04') primary = st.bingo?.pending?.length ? { label: '빙고 우승 확정', run: () => act('bingo.confirm', { mode: 'all' }) } : { label: '🎱 번호 추첨', run: () => act('bingo.draw') };
+  else if (game === 'P05') primary = { label: '⛳ 홀인원 추첨', run: () => act('hole.draw') };
+  else if (game && r?.status === 'betting') primary = { label: '베팅 마감 · 문제 공개', run: () => act('round.open') };
+  else if (game && r && ['open', 'paused', 'closed'].includes(r.status)) primary = { label: `🏁 결과 공개 (${r.answered}/${r.expected})`, run: () => act('round.reveal') };
+  else if (game && canNext && !roundsDone) primary = { label: r ? '▶ 다음 문제' : '▶ 문제 시작', run: () => act('round.next') };
+  else if (game && roundsDone) primary = { label: `🏆 ${meta!.kind === 'team' ? '조별' : '개인'} 순위 공개`, run: () => act('ranking.show', { kind: meta!.kind === 'team' ? 'team' : 'individual' }) };
+
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+      {primary && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-forest-line bg-white/95 p-3 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-xl gap-2">
+            {r?.status === 'open' && !isCountdown && <button className="btn-dark px-3" onClick={() => act('round.pause')}>⏸</button>}
+            {r?.status === 'paused' && <button className="btn-dark px-3" onClick={() => act('round.resume')}>▶</button>}
+            <button className="btn-gold flex-1 !min-h-[60px] !text-[20px]" disabled={!!busy} onClick={primary.run}>
+              {remain !== null && !isCountdown && r?.status === 'open' ? `${remain}초 · ` : ''}{primary.label}
+            </button>
+          </div>
+        </div>
+      )}
       <div>
         <Section title={game ? `${meta!.emoji} ${meta!.title}` : '대기실 (게임 선택 전)'} right={game && <span className="text-sm text-ivory/70">라운드 {ginfo?.revealed ?? 0} / {ginfo?.totalRounds} 완료</span>}>
           {!game && <div className="text-ivory/70">오른쪽(모바일은 아래) 목록에서 진행할 게임을 선택하세요. 참석자 화면은 자동으로 전환됩니다.</div>}
