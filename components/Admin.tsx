@@ -89,6 +89,7 @@ function Dashboard({ slug, setSlug, onLogout }: { slug: 'main' | 'demo'; setSlug
         <span className="rounded-full bg-forest-deep px-3 py-1 text-sm">접속 <b className="text-gold">{st.counts.online}</b>/{st.counts.total}</span>
         {st.teams.map((t: any) => <span key={t.id} className="rounded-full bg-forest-deep px-3 py-1 text-sm" style={{ color: t.color }}>{t.name} {t.online}/{t.size}</span>)}
         {!online && <span className="rounded-full bg-red-600 text-white px-3 py-1 text-sm">서버 연결 끊김 · 재연결 중</span>}
+        <a href={`/screen${slug === 'demo' ? '?e=demo' : ''}`} target="_blank" className="rounded-full bg-gold px-3 py-1 text-sm font-bold text-white">📺 프로젝터 화면</a>
       </header>
       {slug === 'demo' && <div className="mb-3 rounded-xl bg-amber-100 px-3 py-2 text-sm text-amber-800">데모 모드입니다. 참석자 화면: <b>/demo</b> · 실제 행사 데이터에는 영향이 없습니다.</div>}
       <nav className="sticky top-0 z-20 -mx-3 mb-4 flex gap-1 overflow-x-auto bg-white/95 px-3 py-2 backdrop-blur">
@@ -680,6 +681,7 @@ function Settings({ st, act, slug, onLogout }: P & { onLogout: () => void }) {
           <div className="flex gap-2">
             <B onClick={() => navigator.clipboard?.writeText(url)}>주소 복사 (카톡 전송용)</B>
             <a className="btn-dark" href={`/qr${slug === 'demo' ? '?e=demo' : ''}`} target="_blank">QR 크게 보기</a>
+            <a className="btn-gold" href={`/screen${slug === 'demo' ? '?e=demo' : ''}`} target="_blank">📺 프로젝터 화면</a>
           </div>
         </div>
       </Section>

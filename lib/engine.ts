@@ -417,3 +417,46 @@ export async function respond(slug: string, token: string | null, body: any) {
 }
 
 export { INDIVIDUAL_GAMES };
+
+// ---------------------------------------------------------------- 프로젝터 화면 (공개 정보만, 정답은 공개 후에만)
+export async function screenState(slug: string) {
+  const ev = await getEvent(slug);
+  const core = await loadCore(ev.id);
+  const s = core.session;
+  const now = Date.now();
+  const base: any = {
+    serverNow: now,
+    version: core.version,
+    event: { name: ev.name, date: ev.event_date, isDemo: ev.is_demo },
+    teams: core.teams.map((t) => ({
+      id: t.id, name: t.name, color: t.color,
+      size: core.participants.filter((p) => p.team_id === t.id).length,
+      online: core.participants.filter((p) => p.team_id === t.id && isOnline(p, now)).length,
+    })),
+    counts: { online: core.participants.filter((p) => isOnline(p, now)).length, total: core.participants.length },
+    session: { game: s.current_game, phase: s.phase, overlay: s.overlay, overlayData: s.overlay_data },
+    rankings: s.published_rankings ?? null,
+  };
+  if (s.current_game) {
+    const cfg = gameConfig(core.games, s.current_game);
+    const played = await q1<{ n: number }>(`select count(*)::int n from rounds where event_id=$1 and game_type=$2 and not is_void and status='revealed'`, [ev.id, s.current_game]);
+    base.gameInfo = { type: s.current_game, title: GAMES[s.current_game as GameType].title, totalRounds: totalRoundsFor(s.current_game, cfg), revealed: played?.n ?? 0 };
+  }
+  if (s.current_round_id) {
+    let r = await q1('select * from rounds where id=$1', [s.current_round_id]);
+    r = await autoClose(r);
+    if (r) {
+      const pub: any = roundPublic(r);
+      const resp = await q(`select participant_id, team_id, kind, scope from responses where round_id=$1`, [r.id]);
+      pub.answeredCount = new Set(resp.filter((x) => x.kind === 'answer').map((x) => x.participant_id)).size;
+      pub.expected = core.participants.length;
+      pub.teamsAnswered = core.teams.filter((t) => resp.some((x) => x.kind === 'answer' && x.scope === 'team' && x.team_id === t.id)).map((t) => t.id);
+      pub.teamsBet = core.teams.filter((t) => resp.some((x) => x.kind === 'bet' && x.team_id === t.id)).map((t) => t.id);
+      pub.teamAnswered = core.teams.map((t) => ({ id: t.id, n: new Set(resp.filter((x) => x.kind === 'answer' && x.team_id === t.id).map((x) => x.participant_id)).size }));
+      base.round = pub;
+    }
+  }
+  if (s.current_game === 'P04') base.bingo = await bingoView(ev.id, null, core);
+  if (s.current_game === 'P05') base.hole = await holeView(ev.id, null, core);
+  return base;
+}

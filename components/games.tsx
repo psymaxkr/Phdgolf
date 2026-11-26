@@ -699,7 +699,7 @@ export function BingoStage({ st }: { st: any }) {
 }
 
 // ------------------------------------------------------------ 행운의 홀인원
-export function HoleStage({ st }: { st: any }) {
+export function HoleStage({ st, screen = false }: { st: any; screen?: boolean }) {
   const h = st.hole;
   const draws = h?.draws ?? [];
   const latest = draws[draws.length - 1];
@@ -733,23 +733,27 @@ export function HoleStage({ st }: { st: any }) {
   }, [latest?.id]);
 
   const showing = anim && anim.done ? draws.find((d: any) => d.id === anim.id) : null;
-  const iWon = showing && showing.participantId === st.me.id;
+  const iWon = !screen && showing && showing.participantId === st.me?.id;
   return (
     <div>
       {iWon && <Confetti burstKey={showing.id} count={70} />}
-      <div className="mb-4 flex items-center justify-between">
-        <Pill>⛳ 행운의 홀인원</Pill>
-      </div>
-      <div className="card mb-4 text-center">
-        <div className="text-lg text-ivory/70">나의 홀</div>
-        <div className="gold-text text-6xl font-black">{h?.myHole ?? '-'}번 홀</div>
-      </div>
+      {!screen && (
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <Pill>⛳ 행운의 홀인원</Pill>
+          </div>
+          <div className="card mb-4 text-center">
+            <div className="text-lg text-ivory/70">나의 홀</div>
+            <div className="gold-text text-6xl font-black">{h?.myHole ?? '-'}번 홀</div>
+          </div>
+        </>
+      )}
       <div className="card felt mb-4">
         <div className="grid grid-cols-6 gap-2">
           {Array.from({ length: total }, (_, i) => i + 1).map((n) => {
             const isBall = anim?.pos === n;
             const won = draws.some((d: any) => d.hole === n && (anim?.done || d.id !== latest?.id));
-            const mine = h?.myHole === n;
+            const mine = !screen && h?.myHole === n;
             return (
               <div key={n} className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl text-lg font-black ${mine ? 'border-2 border-gold' : 'border border-forest-line'} ${won ? 'bg-turf text-white' : 'bg-white'}`}>
                 {n}
@@ -764,7 +768,7 @@ export function HoleStage({ st }: { st: any }) {
         </div>
       </div>
       {showing && (
-        <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className={`card mb-4 text-center ${iWon ? 'border-gold' : ''}`}>
+        <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className={`card mb-4 text-center ${iWon ? 'border-gold' : ''} ${screen ? 'text-[1.6em]' : ''}`}>
           <div className="text-xl text-gold">🏆 {showing.hole}번 홀 홀인원!</div>
           <div className="text-4xl font-black">{showing.name}</div>
           <div className="text-lg text-ivory/70">{showing.teamName}</div>
