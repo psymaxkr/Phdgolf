@@ -508,7 +508,14 @@ export async function adminAction(slug: string, action: string, p: any) {
         if (cur && cur.status !== 'revealed' && !p.force) throw new AppError('진행 중인 문제가 있습니다. 결과를 공개하거나 라운드를 취소하세요.');
       }
       if (s?.current_game) await q(`update games set status='done' where event_id=$1 and game_type=$2`, [E, s.current_game]);
-      await q(`update game_sessions set current_game=null, phase='lobby', current_round_id=null, overlay=null, updated_at=now() where event_id=$1`, [E]);
+      // 게임 종료 시 대기 화면 순위표 자동 갱신
+      const coreE = await loadCore(E);
+      const ranksE = buildRankings(coreE, await computeScores(E), coreE.session.published_rankings);
+      await q(
+        `update game_sessions set current_game=null, phase='lobby', current_round_id=null, overlay=null, updated_at=now(),
+         prev_rankings=published_rankings, published_rankings=$2 where event_id=$1`,
+        [E, ranksE]
+      );
       break;
     }
     case 'round.next':
