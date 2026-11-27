@@ -14,8 +14,12 @@ export function competitionRanks<T>(items: T[], score: (t: T) => number, desc = 
   return out;
 }
 
-/** T01 골든벨: 정답자 1명당 소속 조 100점 */
-export function scoreGoldenBell(answer: number, responses: Resp[], teamIds: string[]) {
+/** T01 골든벨: 정답 비율 × 600점 (6명 조 = 정답자 1명당 100점, 인원이 다르면 비율로 환산) */
+export function goldenBellPoints(correct: number, teamSize: number) {
+  if (teamSize <= 0) return 0;
+  return Math.round((correct / teamSize) * 600);
+}
+export function scoreGoldenBell(answer: number, responses: Resp[], teamIds: string[], teamSizes: Record<string, number> = {}) {
   const perTeam: Record<string, { correct: number; answered: number }> = {};
   teamIds.forEach((t) => (perTeam[t] = { correct: 0, answered: 0 }));
   const dist = [0, 0, 0, 0];
@@ -31,7 +35,10 @@ export function scoreGoldenBell(answer: number, responses: Resp[], teamIds: stri
     }
   }
   const total = responses.length;
-  const teamPoints = teamIds.map((t) => ({ teamId: t, points: perTeam[t].correct * 100, correct: perTeam[t].correct, answered: perTeam[t].answered }));
+  const teamPoints = teamIds.map((t) => {
+    const size = teamSizes[t] ?? 6;
+    return { teamId: t, points: goldenBellPoints(perTeam[t].correct, size), correct: perTeam[t].correct, answered: perTeam[t].answered, size };
+  });
   return { dist, total, correctCount: correctIds.length, correctIds, teamPoints };
 }
 

@@ -452,7 +452,7 @@ function ResultT01({ r, res, myTeam }: any) {
         {res.explanation && <div className="mt-3 rounded-2xl bg-forest-deep p-3 text-lg">💡 {res.explanation}</div>}
         <div className="mt-3 text-center text-lg">정답률 <b className="text-gold">{res.accuracy}%</b> ({res.correctCount}/{res.expected}명)</div>
       </div>
-      <TeamPoints teams={(res.teams ?? []).map((t: any) => ({ ...t, detail: `정답 ${t.correct}명` }))} myTeam={myTeam} />
+      <TeamPoints teams={(res.teams ?? []).map((t: any) => ({ ...t, detail: `정답 ${t.correct}/${t.size ?? '-'}명` }))} myTeam={myTeam} />
     </>
   );
 }

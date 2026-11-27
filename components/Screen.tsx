@@ -313,7 +313,7 @@ function Result({ st }: { st: any }) {
             ))}
           </div>
           <div className="mb-6 text-center text-[1.8vw]">정답률 <b className="text-turf">{res.accuracy}%</b> · {res.explanation}</div>
-          <TeamCards teams={res.teams ?? []} detail={(t) => `정답 ${t.correct}명`} />
+          <TeamCards teams={res.teams ?? []} detail={(t) => `정답 ${t.correct}/${t.size ?? '-'}명`} />
         </>
       )}
       {g === 'T02' && (

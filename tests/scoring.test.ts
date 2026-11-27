@@ -6,8 +6,13 @@ const R = (id: string, team: string, value: any) => ({ participantId: id, teamId
 
 test('골든벨: 정답자 1명당 100점, 최대 600', () => {
   const resp = [...Array(6)].map((_, i) => R('a' + i, 'A', { choice: 2 })).concat([R('b1', 'B', { choice: 1 }), R('b2', 'B', { choice: 2 })]);
-  const r = S.scoreGoldenBell(2, resp, ['A', 'B', 'C']);
+  const r = S.scoreGoldenBell(2, resp, ['A', 'B', 'C'], { A: 6, B: 6, C: 6 });
   assert.deepEqual(r.teamPoints.map((t) => t.points), [600, 100, 0]);
+  // 인원이 다른 조: 정답 비율 × 600
+  assert.equal(S.goldenBellPoints(5, 5), 600);
+  assert.equal(S.goldenBellPoints(7, 7), 600);
+  assert.equal(S.goldenBellPoints(3, 5), 360);
+  assert.equal(S.goldenBellPoints(4, 7), 343);
   assert.equal(r.correctCount, 7);
 });
 

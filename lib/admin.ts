@@ -130,8 +130,9 @@ async function scoreRound(eventId: string, roundId: string) {
   switch (g) {
     case 'T01': {
       const ans = Number(question?.answer);
-      const sc = S.scoreGoldenBell(ans, answers, teamIds);
-      sc.teamPoints.forEach((t) => t.points && rows.push({ ...base, target: 'team', team_id: t.teamId, points: t.points, reason: `골든벨 ${r.round_no}번 정답 ${t.correct}명` }));
+      const sizes: Record<string, number> = Object.fromEntries(core.teams.map((t) => [t.id, core.participants.filter((p) => p.team_id === t.id).length]));
+      const sc = S.scoreGoldenBell(ans, answers, teamIds, sizes);
+      sc.teamPoints.forEach((t) => t.points && rows.push({ ...base, target: 'team', team_id: t.teamId, points: t.points, reason: `골든벨 ${r.round_no}번 정답 ${t.correct}/${t.size}명` }));
       result = {
         answer: ans, options: question?.options ?? [], explanation: question?.explanation ?? '', dist: sc.dist, total: sc.total,
         expected: core.participants.length, correctCount: sc.correctCount,

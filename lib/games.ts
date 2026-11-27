@@ -18,11 +18,11 @@ export type GameMeta = {
 export const GAMES: Record<GameType, GameMeta> = {
   T01: {
     type: 'T01', title: '골프 골든벨', kind: 'team', emoji: '🔔', rounds: 10, maxRounds: 30, timeLimit: 15, usesQuestions: true,
-    rules: ['골프 상식 4지선다 퀴즈입니다.', '조원 모두 각자 답을 고릅니다.', '정답자 1명당 우리 조에 100점!', '제한시간 안에 답을 골라 제출하세요.'],
+    rules: ['골프 상식 4지선다 퀴즈입니다.', '조원 모두 각자 답을 고릅니다.', '우리 조 정답 비율만큼 점수! (전원 정답 600점)', '제한시간 안에 답을 골라 제출하세요.'],
   },
   T02: {
     type: 'T02', title: '이심전심', kind: 'team', emoji: '🤝', rounds: 5, maxRounds: 20, timeLimit: 15, usesQuestions: true,
-    rules: ['두 가지 중 하나를 고릅니다.', '우리 조원들과 같은 답을 고를수록 높은 점수!', '6명 일치 600점 · 5명 400점 · 4명 200점', '3대3이면 0점입니다.'],
+    rules: ['두 가지 중 하나를 고릅니다.', '우리 조원들과 같은 답을 고를수록 높은 점수!', '전원 일치 600점 · 1명 다르면 400점 · 2명 다르면 200점', '반반으로 갈리면 0점입니다.'],
   },
   T03: {
     type: 'T03', title: '얼마일까요?', kind: 'team', emoji: '💰', rounds: 5, maxRounds: 10, timeLimit: 30, usesQuestions: true, leaderOnly: true,
