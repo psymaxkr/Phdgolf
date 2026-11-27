@@ -1,6 +1,6 @@
 // PHD PLAY 2026 - 관리자 기능 (진행 제어, 채점, 추첨, 관리)
 import { q, q1, tx, bump } from './db';
-import { GAMES, GameType, PRIZE_CATEGORIES, TEAM_GAMES } from './games';
+import { GAMES, GameType, PRIZE_CATEGORIES, TEAM_GAMES, TEAM_COLORS } from './games';
 import * as S from './scoring';
 import { randInt, secureRand } from './auth';
 import {
@@ -808,6 +808,22 @@ export async function adminAction(slug: string, action: string, p: any) {
       await tx(async (c) => {
         for (const [pid, tid] of Object.entries(assign)) await c.query('update participants set team_id=$2, is_leader=false where id=$1', [pid, tid]);
       });
+      break;
+    }
+    case 'team.setCount': {
+      const n = Math.max(2, Math.min(4, Number(p.count) || 3));
+      const teams = await q('select id from teams where event_id=$1 order by sort_order, name', [E]);
+      await tx(async (c) => {
+        if (teams.length > n) {
+          const extra = teams.slice(n).map((t) => t.id);
+          await c.query('update participants set team_id=null, is_leader=false where team_id = any($1::uuid[])', [extra]);
+          await c.query('delete from teams where id = any($1::uuid[])', [extra]);
+        }
+        for (let i = teams.length; i < n; i++) {
+          await c.query('insert into teams(event_id, name, sort_order, color) values ($1,$2,$3,$4)', [E, `${i + 1}조`, i + 1, TEAM_COLORS[i] ?? '#555']);
+        }
+      });
+      if (p.autoAssign) await adminAction(slug, 'p.autoTeams', {});
       break;
     }
     case 'team.rename':

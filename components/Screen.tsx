@@ -191,7 +191,7 @@ function RoundView({ st, serverNow }: { st: any; serverNow: () => number }) {
       <div className="w-full max-w-6xl text-center">
         <div className="gold-text mb-4 text-[4.5vw] font-black">각 조 베팅 중!</div>
         <div className="mb-8 text-[2vw] text-ivory/70">조장님이 걸 점수를 입력합니다 · 문제는 베팅 후 공개</div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${st.teams.length}, minmax(0, 1fr))` }}>
           {st.teams.map((t: any) => {
             const done = r.teamsBet.includes(t.id);
             return (
@@ -282,7 +282,7 @@ function RoundView({ st, serverNow }: { st: any; serverNow: () => number }) {
 
 function TeamCards({ teams, detail }: { teams: any[]; detail: (t: any) => React.ReactNode }) {
   return (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="mx-auto grid max-w-6xl gap-6" style={{ gridTemplateColumns: `repeat(${Math.max(1, teams.length)}, minmax(0, 1fr))` }}>
       {teams.map((t: any, i: number) => (
         <motion.div key={t.teamId} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.25 }} className="rounded-3xl border-2 border-forest-line bg-white p-6 text-center shadow-lg">
           <div className="text-[2.4vw] font-black">{t.name}</div>

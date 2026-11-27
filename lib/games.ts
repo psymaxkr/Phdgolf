@@ -69,4 +69,4 @@ export const PRIZE_CATEGORIES: Record<string, string> = {
   etc: '기타',
 };
 
-export const TEAM_COLORS = ['#0B3D91', '#15803D', '#C2410C'];
+export const TEAM_COLORS = ['#0B3D91', '#15803D', '#C2410C', '#7C3AED'];

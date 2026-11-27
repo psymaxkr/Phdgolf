@@ -436,7 +436,14 @@ function People({ st, act }: P) {
         </Section>
       </div>
 
-      <Section title="조 이름">
+      <Section title={`조 구성 (현재 ${st.teams.length}개 조)`} right={
+        <div className="flex flex-wrap gap-2">
+          {[2, 3, 4].map((n) => (
+            <B key={n} kind={st.teams.length === n ? 'gold' : 'dark'} onClick={() => st.teams.length !== n && confirm(`${n}개 조로 바꾸고 참석자를 자동으로 다시 나눌까요? (여성 고르게 분산 · 조장 지정은 초기화)`) && act('team.setCount', { count: n, autoAssign: true }, `${n}개 조로 변경 완료`)}>{n}개 조</B>
+          ))}
+        </div>
+      }>
+        <div className="mb-3 text-sm text-ivory/70">참석자 {st.participants.length}명 → 조당 약 {Math.ceil(st.participants.length / Math.max(1, st.teams.length))}명</div>
         <div className="grid gap-2 sm:grid-cols-3">
           {st.teams.map((t: any) => (
             <div key={t.id} className="flex items-center gap-2">
