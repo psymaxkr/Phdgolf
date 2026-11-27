@@ -271,7 +271,9 @@ function Control({ st, act, busy, serverNow, slug }: P) {
                     {g.status === 'done' && ' · 완료'}
                   </div>
                 </div>
-                {game !== g.type && (
+                {!g.enabled ? (
+                  <button className="rounded-lg border border-forest-line px-3 py-2 text-sm font-bold" onClick={() => act('game.toggle', { gameType: g.type })}>켜기</button>
+                ) : game !== g.type && (
                   <button className="rounded-lg bg-gold px-3 py-2 text-sm font-bold text-white" onClick={() => act('game.select', { gameType: g.type })}>
                     {g.status === 'done' ? '다시' : '선택'}
                   </button>
